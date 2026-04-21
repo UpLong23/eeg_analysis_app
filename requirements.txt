@@ -1,7 +1,6 @@
 mne==1.12.0
 numpy==2.4.4
 pandas==3.0.2
-psychopy
-pyserial==3.5
 scipy==1.17.1
 streamlit
+plotly
