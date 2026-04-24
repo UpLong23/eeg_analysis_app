@@ -128,8 +128,9 @@ def compute_epochs(eeg_key, off, condition=None):
 
 # ── Figure builders ───────────────────────────────────────────────────────────
 @st.cache_data
-def build_signal_json(eeg_key):
+def build_signal_json(eeg_key, eeg_cutoff):
     _df  = st.session_state.filtered_eeg
+    _cutoff = st.session_state.cut
     _idx = _df.index * 4e-3
     fig  = go.Figure()
     fig.add_trace(go.Scattergl(
@@ -222,7 +223,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-signal_json = build_signal_json(eeg_name)
+signal_json = build_signal_json(eeg_name, cutoff)
 
 # Pre-render shapes at the current offset so the chart is correct on first load
 initial_shapes = [
