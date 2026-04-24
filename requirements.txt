@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 adbc_driver_manager==1.11.0
 adbc_driver_postgresql==1.11.0
 adbc_driver_sqlite==1.11.0
@@ -130,4 +129,4 @@ pandas==3.0.2
 scipy==1.17.1
 streamlit
 plotly
->>>>>>> 0b2027977529d7d978277a18d53401c5fa4cd09b
+
