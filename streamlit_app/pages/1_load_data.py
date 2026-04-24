@@ -38,7 +38,7 @@ if "transformed_log" not in st.session_state:
 
 
 
-# @st.cache_data
+@st.cache_data
 def load_data(file_bytes):
     eeg = pd.read_csv(BytesIO(file_bytes), header=None)
     for i, ch in enumerate(CHANNELS):
