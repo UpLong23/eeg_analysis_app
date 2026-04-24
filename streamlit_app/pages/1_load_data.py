@@ -80,7 +80,8 @@ def filter_eeg(eeg):
     for column in eeg_bs.columns:
         eeg_bs[column] = signal.filtfilt(b, a, eeg_bs[column])
 
-    st.session_state.filtered_eeg = eeg_bs
+    # st.session_state.filtered_eeg = eeg_bs
+    st.write(st.session_state.filtered_eeg)
 
 def transform_log(log):
     deltas            = log['timestamp'] - log['timestamp'][0]
