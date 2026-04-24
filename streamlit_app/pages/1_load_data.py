@@ -119,11 +119,11 @@ with st.expander("EEG Data", expanded=True):
         cutoff = st.number_input(
             "Insert cutoff in seconds",
             min_value=0.0,
-            max_value=float(20 * 60),
+            max_value=None,
             value=0.0,
             step=1.0,
             width=100,
-            format="%.1f"
+            format="%.2f"
         )
 
         eeg_cut = eeg[int(cutoff / 4e-3):]
