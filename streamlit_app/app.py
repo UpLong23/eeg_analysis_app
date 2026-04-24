@@ -122,14 +122,15 @@ def slice_epochs(off, mask=None):
     return np.stack(slices, axis=0)
 
 @st.cache_data
-def compute_epochs(eeg_key, off, condition=None):
+def compute_epochs(eeg_key, off, data_hash, condition=None):
+    # data_hash is only used as a cache-busting key — not used in the body
     mask = (log['condition'] == condition).to_numpy() if condition else None
     return slice_epochs(off, mask)
 
 # ── Figure builders ───────────────────────────────────────────────────────────
 @st.cache_data
-def build_signal_json(eeg_key, eeg_cutoff):
-    _df  = st.session_state.filtered_eeg
+def build_signal_json(eeg_key, eeg_cutoff, _df):
+    # _df  = st.session_state.filtered_eeg
     _cutoff = st.session_state.cut
     _idx = _df.index * 4e-3
     fig  = go.Figure()
@@ -223,7 +224,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-signal_json = build_signal_json(eeg_name, cutoff)
+signal_json = build_signal_json(eeg_name, cutoff, st.session_state.filtered_eeg)
 
 # Pre-render shapes at the current offset so the chart is correct on first load
 initial_shapes = [
@@ -315,7 +316,7 @@ def erp_section(show_grand, cond_checks):
         "Stimulus offset (s) — shifts ERP epochs and signal regions",
         min_value=-100.0, max_value=100.0,
         # value=float(st.session_state.erp_offset),
-        value = 0,
+        value = 0.,
         step=0.01, format="%.2f",
         key="erp_offset_input",
     )
@@ -335,12 +336,17 @@ def erp_section(show_grand, cond_checks):
     components.html(push_js, height=0)
 
     # ── Compute epochs ─────────────────────────────────────────────────────────
-    initial  = compute_epochs(eeg_name, offset)
+    data_version = hash(st.session_state.filtered_eeg.values.tobytes())
+    initial = compute_epochs(eeg_name, offset, data_version)
     n_trials = initial.shape[0]
     erp_mean = np.mean(initial, axis=0)
 
-    cond_epochs_map = {cond: compute_epochs(eeg_name, offset, condition=cond)
-                       for cond in CONDITIONS}
+    # cond_epochs_map = {cond: compute_epochs(eeg_name, offset, condition=cond)
+    #                    for cond in CONDITIONS}
+    
+    cond_epochs_map = {cond: compute_epochs(eeg_name, offset, data_version, condition=cond)
+    for cond in CONDITIONS if cond_checks.get(cond)
+}
 
     # ── Shared y-range ─────────────────────────────────────────────────────────
     all_means = [erp_mean] + [np.mean(v, axis=0) for v in cond_epochs_map.values()]
