@@ -102,13 +102,15 @@ if "erp_offset" not in st.session_state:
 
 # ── Epoch helpers ─────────────────────────────────────────────────────────────
 def slice_epochs(off, mask=None):
+    _data = st.session_state.filtered_eeg.copy()
+    _data.index = _data.index * 4e-3
     log_sub = log[mask] if mask is not None else log
     starts  = (off + log_sub['stim_start']).to_numpy()
     stops   = (off + log_sub['stim_stop']).to_numpy()
     slices  = []
     for lower, upper in zip(starts, stops):
-        s = data[CHANNELS][
-            (data.index > (lower - 0.4)) & (data.index <= upper)
+        s = _data[CHANNELS][
+            (_data.index > (lower - 0.4)) & (_data.index <= upper)
         ].to_numpy()
         if len(s) >= T_FIXED:
             slices.append(s[:T_FIXED])
@@ -121,17 +123,13 @@ def slice_epochs(off, mask=None):
         return np.zeros((1, T_FIXED, len(CHANNELS)))
     return np.stack(slices, axis=0)
 
-@st.cache_data
-def compute_epochs(eeg_key, off, data_hash, condition=None):
-    # data_hash is only used as a cache-busting key — not used in the body
+def compute_epochs(off, condition=None):
     mask = (log['condition'] == condition).to_numpy() if condition else None
     return slice_epochs(off, mask)
 
 # ── Figure builders ───────────────────────────────────────────────────────────
 @st.cache_data
 def build_signal_json(eeg_key, eeg_cutoff, _df):
-    # _df  = st.session_state.filtered_eeg
-    _cutoff = st.session_state.cut
     _idx = _df.index * 4e-3
     fig  = go.Figure()
     fig.add_trace(go.Scattergl(
@@ -224,7 +222,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-signal_json = build_signal_json(eeg_name, cutoff, st.session_state.filtered_eeg)
+signal_json = build_signal_json(eeg_name, cutoff, df)
 
 # Pre-render shapes at the current offset so the chart is correct on first load
 initial_shapes = [
@@ -336,17 +334,12 @@ def erp_section(show_grand, cond_checks):
     components.html(push_js, height=0)
 
     # ── Compute epochs ─────────────────────────────────────────────────────────
-    data_version = hash(st.session_state.filtered_eeg.values.tobytes())
-    initial = compute_epochs(eeg_name, offset, data_version)
+    initial  = compute_epochs(offset)
     n_trials = initial.shape[0]
     erp_mean = np.mean(initial, axis=0)
 
-    # cond_epochs_map = {cond: compute_epochs(eeg_name, offset, condition=cond)
-    #                    for cond in CONDITIONS}
-    
-    cond_epochs_map = {cond: compute_epochs(eeg_name, offset, data_version, condition=cond)
-    for cond in CONDITIONS if cond_checks.get(cond)
-}
+    cond_epochs_map = {cond: compute_epochs(offset, condition=cond)
+                       for cond in CONDITIONS}
 
     # ── Shared y-range ─────────────────────────────────────────────────────────
     all_means = [erp_mean] + [np.mean(v, axis=0) for v in cond_epochs_map.values()]
