@@ -316,7 +316,7 @@ def erp_section(show_grand, cond_checks):
         min_value=-100.0, max_value=100.0,
         # value=float(st.session_state.erp_offset),
         value = 0,
-        step=0.01, format="%.3f",
+        step=0.01, format="%.2f",
         key="erp_offset_input",
     )
     st.session_state.erp_offset = offset
