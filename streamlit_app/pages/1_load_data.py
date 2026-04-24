@@ -122,7 +122,7 @@ with st.expander("EEG Data", expanded=True):
             max_value=None,
             value=0.0,
             step=1.0,
-            width=100,
+            # width=100,
             format="%.2f"
         )
 
