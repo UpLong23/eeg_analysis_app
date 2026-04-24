@@ -121,13 +121,13 @@ def slice_epochs(off, mask=None):
         return np.zeros((1, T_FIXED, len(CHANNELS)))
     return np.stack(slices, axis=0)
 
-@st.cache_data
+# @st.cache_data
 def compute_epochs(eeg_key, off, condition=None):
     mask = (log['condition'] == condition).to_numpy() if condition else None
     return slice_epochs(off, mask)
 
 # ── Figure builders ───────────────────────────────────────────────────────────
-@st.cache_data
+# @st.cache_data
 def build_signal_json(eeg_key):
     _df  = st.session_state.filtered_eeg
     _idx = _df.index * 4e-3
