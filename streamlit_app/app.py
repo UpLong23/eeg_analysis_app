@@ -314,8 +314,9 @@ def erp_section(show_grand, cond_checks):
     offset = st.number_input(
         "Stimulus offset (s) — shifts ERP epochs and signal regions",
         min_value=-100.0, max_value=100.0,
-        value=float(st.session_state.erp_offset),
-        step=0.01, format="%.2f",
+        # value=float(st.session_state.erp_offset),
+        value = 0,
+        step=0.001, format="%.3f",
         key="erp_offset_input",
     )
     st.session_state.erp_offset = offset
